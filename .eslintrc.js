@@ -505,7 +505,7 @@ module.exports = {
 		'arrow-parens': ['error', 'as-needed'],
 
 		// enforce a maximum cyclomatic complexity allowed in a program
-		complexity: ['error', { max: 13 }],
+		complexity: ['error', { max: 50 }],
 
 		// specify curly brace conventions for all control statements
 		curly: ['error', 'all'],

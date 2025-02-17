@@ -146,6 +146,105 @@ export class TimeScaleApi<HorzScaleItem> implements ITimeScaleApi<HorzScaleItem>
 		return this._timeScale.indexToCoordinate(timePointIndex);
 	}
 
+	public timeToCoordinateRounded(time: HorzScaleItem): Coordinate | null {
+		const timeToCoordinateResult = this.timeToCoordinate(time);
+		if (timeToCoordinateResult !== null) {
+			return timeToCoordinateResult;
+		}
+
+		const timePoint = this._horzScaleBehavior.convertHorzItemToInternal(time);
+		const timeKey = this._horzScaleBehavior.key(timePoint);
+
+		// Get the visible range of points
+		const visibleRange = this._timeScale.visibleStrictRange();
+		if (visibleRange === null) {
+			return null;
+		}
+
+		let left = visibleRange.left();
+		let right = visibleRange.right();
+
+		// Binary search for the closest index
+		while (left <= right) {
+			const mid = Math.floor((left + right) / 2) as TimePointIndex;
+			const currentPoint = this._timeScale.indexToTimeScalePoint(mid);
+
+			if (currentPoint === null) {
+				// If mid point is null, try to find a valid point in either direction
+				let validIndex = mid;
+				while (validIndex <= right) {
+					const nextPoint = this._timeScale.indexToTimeScalePoint(validIndex);
+					if (nextPoint !== null) {
+						return this._timeScale.indexToCoordinate(validIndex);
+					}
+					validIndex = (validIndex + 1) as TimePointIndex;
+				}
+				validIndex = (mid - 1) as TimePointIndex;
+				while (validIndex >= left) {
+					const prevPoint = this._timeScale.indexToTimeScalePoint(validIndex);
+					if (prevPoint !== null) {
+						return this._timeScale.indexToCoordinate(validIndex);
+					}
+					validIndex = (validIndex - 1) as TimePointIndex;
+				}
+				return null;
+			}
+
+			const currentKey = this._horzScaleBehavior.key(currentPoint.time);
+
+			if (currentKey === timeKey) {
+				return this._timeScale.indexToCoordinate(mid);
+			}
+
+			if (currentKey < timeKey) {
+				// If this is the last iteration, return the closer of the two surrounding points
+				if (left === right - 1) {
+					const nextPoint = this._timeScale.indexToTimeScalePoint(right);
+					if (nextPoint === null) {
+						return this._timeScale.indexToCoordinate(mid);
+					}
+					const nextKey = this._horzScaleBehavior.key(nextPoint.time);
+					return this._timeScale.indexToCoordinate(
+						Math.abs(currentKey - timeKey) <= Math.abs(nextKey - timeKey) ? mid : right
+					);
+				}
+				left = (mid + 1) as TimePointIndex;
+			} else {
+				// If this is the last iteration, return the closer of the two surrounding points
+				if (left === right - 1) {
+					const prevPoint = this._timeScale.indexToTimeScalePoint(left);
+					if (prevPoint === null) {
+						return this._timeScale.indexToCoordinate(mid);
+					}
+					const prevKey = this._horzScaleBehavior.key(prevPoint.time);
+					return this._timeScale.indexToCoordinate(
+						Math.abs(prevKey - timeKey) <= Math.abs(currentKey - timeKey) ? left : mid
+					);
+				}
+				right = (mid - 1) as TimePointIndex;
+			}
+		}
+
+		// If we get here, return the coordinate for the closest boundary
+		const leftPoint = this._timeScale.indexToTimeScalePoint(left);
+		const rightPoint = this._timeScale.indexToTimeScalePoint(right);
+
+		if (leftPoint === null && rightPoint === null) {
+			return null;
+		}
+		if (leftPoint === null) {
+			return this._timeScale.indexToCoordinate(right);
+		}
+		if (rightPoint === null) {
+			return this._timeScale.indexToCoordinate(left);
+		}
+
+		const leftDiff = Math.abs(this._horzScaleBehavior.key(leftPoint.time) - timeKey);
+		const rightDiff = Math.abs(this._horzScaleBehavior.key(rightPoint.time) - timeKey);
+
+		return this._timeScale.indexToCoordinate(leftDiff <= rightDiff ? left : right);
+	}
+
 	public coordinateToTime(x: number): HorzScaleItem | null {
 		const timeScale = this._model.timeScale();
 		const timePointIndex = timeScale.coordinateToIndex(x as Coordinate);
