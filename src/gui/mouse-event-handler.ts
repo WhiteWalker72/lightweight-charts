@@ -68,9 +68,9 @@ export interface Position {
 // we can use `const name = 500;` but with `const enum` this values will be inlined into code
 // so we do not need to have it as variables
 const enum Delay {
-	ResetClick = 500,
+	ResetClick = 0,
 	LongTap = 240,
-	PreventFiresTouchEvents= 500,
+	PreventFiresTouchEvents= 0,
 }
 
 const enum Constants {
