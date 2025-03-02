@@ -118,6 +118,8 @@ export interface ITimeScaleApi<HorzScaleItem> {
 	 */
 	timeToCoordinate(time: HorzScaleItem): Coordinate | null;
 
+	timeToCoordinateRounded(time: HorzScaleItem): Coordinate;
+
 	/**
 	 * Converts a coordinate to time.
 	 *

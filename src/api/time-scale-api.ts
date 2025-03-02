@@ -146,6 +146,37 @@ export class TimeScaleApi<HorzScaleItem> implements ITimeScaleApi<HorzScaleItem>
 		return this._timeScale.indexToCoordinate(timePointIndex);
 	}
 
+	public timeToCoordinateRounded(time: HorzScaleItem): Coordinate {
+		const timePoint = this._horzScaleBehavior.convertHorzItemToInternal(time);
+		const timePointIndex = this._timeScale.timeToIndex(timePoint, true);
+
+		if (timePointIndex === null) {
+			const visibleRange = this._timeScale.visibleStrictRange();
+			if (visibleRange === null) {
+				return 0 as Coordinate;
+			}
+
+			const firstIndex = visibleRange.left();
+			const lastIndex = visibleRange.right();
+
+			const firstTime = this._timeScale.indexToTime(firstIndex);
+			const lastTime = this._timeScale.indexToTime(lastIndex);
+
+			if (firstTime === null || lastTime === null) {
+				return this._timeScale.indexToCoordinate(firstIndex);
+			}
+
+			const firstDiff = this._horzScaleBehavior.key(time) - this._horzScaleBehavior.key(firstTime as HorzScaleItem);
+			const lastDiff = this._horzScaleBehavior.key(time) - this._horzScaleBehavior.key(lastTime as HorzScaleItem);
+
+			return Math.abs(firstDiff) <= Math.abs(lastDiff) ?
+				this._timeScale.indexToCoordinate(firstIndex) :
+				this._timeScale.indexToCoordinate(lastIndex);
+		}
+
+		return this._timeScale.indexToCoordinate(timePointIndex);
+	}
+
 	public coordinateToTime(x: number): HorzScaleItem | null {
 		const timeScale = this._model.timeScale();
 		const timePointIndex = timeScale.coordinateToIndex(x as Coordinate);
