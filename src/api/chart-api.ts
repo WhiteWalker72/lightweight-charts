@@ -231,6 +231,12 @@ export class ChartApi<HorzScaleItem> implements IChartApiBase<HorzScaleItem>, Da
 		return this._addSeriesImpl('Candlestick', candlestickStyleDefaults, options);
 	}
 
+	public getCandlestickSeriesList(): ISeriesApi<'Candlestick', HorzScaleItem>[] {
+		const mapKeys = Array.from(this._seriesMap.keys());
+		const filteredKeys = mapKeys.filter((key: SeriesApi<SeriesType, HorzScaleItem>) => key.seriesType() === 'Candlestick');
+		return filteredKeys as unknown as ISeriesApi<'Candlestick', HorzScaleItem>[];
+	}
+
 	public addHistogramSeries(options?: HistogramSeriesPartialOptions): ISeriesApi<'Histogram', HorzScaleItem> {
 		return this._addSeriesImpl('Histogram', histogramStyleDefaults, options);
 	}

@@ -118,6 +118,12 @@ export interface ITimeScaleApi<HorzScaleItem> {
 	 */
 	timeToCoordinate(time: HorzScaleItem): Coordinate | null;
 
+	/**
+	 * Converts a time to local x coordinate rounded to the nearest possible option for the time scale.
+	 *
+	 * @param time - Time needs to be converted
+	 * @returns X coordinate of that time or `null` if no time found on time scale
+	 */
 	timeToCoordinateRounded(time: HorzScaleItem): Coordinate;
 
 	/**

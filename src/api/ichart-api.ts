@@ -171,6 +171,13 @@ export interface IChartApiBase<HorzScaleItem = Time> {
 	addCandlestickSeries(candlestickOptions?: CandlestickSeriesPartialOptions): ISeriesApi<'Candlestick', HorzScaleItem>;
 
 	/**
+	 * Returns the list of candlestick series.
+	 *
+	 * @returns The list of candlestick series.
+	 */
+	getCandlestickSeriesList(): ISeriesApi<'Candlestick', HorzScaleItem>[];
+
+	/**
 	 * Creates a histogram series with specified parameters.
 	 *
 	 * @param histogramOptions - Customization parameters of the series being created.
